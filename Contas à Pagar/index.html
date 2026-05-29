@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financeiro - Grupo Ceam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style_financeiro.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-hospital"></i>
+                <span>GRUPO CEAM</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-tab="visao-geral">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Visão Geral</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tab="indicadores">
+                            <i class="fas fa-calculator"></i>
+                            <span>Indicadores</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tab="categorias">
+                            <i class="fas fa-tags"></i>
+                            <span class="cat-label-text">Categorias</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="nav-suppliers-item">
+                        <a href="#" class="nav-link" data-tab="fornecedores">
+                            <i class="fas fa-building"></i>
+                            <span class="sup-label-text">Fornecedores</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tab="lancamentos">
+                            <i class="fas fa-list-ul"></i>
+                            <span>Lançamentos</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="period-badge">
+                    <i class="far fa-calendar-alt"></i>
+                    <span id="period-text">Nov/2025 - Mai/2026</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Context Toggle -->
+            <div class="context-toggle-bar">
+                <button class="ctx-btn active" id="ctx-pagar" onclick="setContext('pagar')">
+                    <i class="fas fa-file-invoice-dollar"></i> Contas a Pagar
+                </button>
+                <button class="ctx-btn" id="ctx-receber" onclick="setContext('receber')">
+                    <i class="fas fa-hand-holding-usd"></i> Contas a Receber
+                </button>
+                <div class="status-filter" id="status-filter-pagar">
+                    <span class="filter-label">Situação:</span>
+                    <button class="status-btn active" data-status="all" onclick="setStatus('all')">Todas</button>
+                    <button class="status-btn" data-status="pago" onclick="setStatus('pago')">Pagas</button>
+                    <button class="status-btn" data-status="a_pagar" onclick="setStatus('a_pagar')">A Pagar</button>
+                </div>
+            </div>
+
+            <header>
+                <div class="header-info">
+                    <h1 id="main-title">Contas a Pagar</h1>
+                    <p class="subtitle" id="main-subtitle">Gestão de desembolsos e obrigações financeiras</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-refresh" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+            </header>
+
+            <!-- KPIs -->
+            <div class="stats-grid" id="kpi-grid">
+                <!-- injected by JS -->
+            </div>
+
+            <!-- Tab: Visão Geral -->
+            <div id="visao-geral" class="tab-content active">
+                <div class="filter-bar" id="filter-bar-overview">
+                    <label for="filter-company-overview">Empresa:</label>
+                    <select id="filter-company-overview" class="filter-company-select" onchange="changeCompany(this.value)">
+                        <option value="all">Ambas (Grupo Ceam)</option>
+                        <option value="vale_sapucai">Vale do Sapucaí (Centro Médico)</option>
+                        <option value="ceam_brasil">Ceam Brasil (Convênio)</option>
+                    </select>
+                </div>
+                <div class="charts-grid-full">
+                    <div class="chart-container full-width">
+                        <h3 class="chart-title" id="chart-evolution-title">Evolução Mensal</h3>
+                        <canvas id="chart-evolution"></canvas>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 class="chart-title" id="chart-pie-title">Distribuição por Categoria</h3>
+                        <canvas id="chart-categories-pie"></canvas>
+                    </div>
+                    <div class="ranking-panel" id="ranking-panel">
+                        <h3 class="chart-title" id="ranking-title">Top 5 Fornecedores</h3>
+                        <div id="mini-ranking-suppliers"></div>
+                        <button class="btn-more" onclick="showTab('fornecedores')">Ver todos <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Indicadores -->
+            <div id="indicadores" class="tab-content">
+                <div class="filter-bar" id="filter-bar-ind">
+                    <label for="filter-company-ind">Empresa:</label>
+                    <select id="filter-company-ind" class="filter-company-select" onchange="changeCompany(this.value)">
+                        <option value="all">Ambas (Grupo Ceam)</option>
+                        <option value="vale_sapucai">Vale do Sapucaí (Centro Médico)</option>
+                        <option value="ceam_brasil">Ceam Brasil (Convênio)</option>
+                    </select>
+                    <label for="filter-month-ind" style="margin-left: 15px;">Filtrar Mês:</label>
+                    <select id="filter-month-ind" onchange="buildIndicadores()">
+                        <option value="all">Todos os Meses</option>
+                    </select>
+                </div>
+                <!-- Insights Automáticos -->
+                <div class="insights-grid" id="insights-container">
+                    <!-- Gerados via JavaScript -->
+                </div>
+                
+                <!-- Gráficos de Indicadores -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 class="chart-title">Estrutura de Custos (Contas a Pagar Histórico)</h3>
+                        <canvas id="chart-cost-structure"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 class="chart-title">Balanço Pagar vs Receber (Maio/2026)</h3>
+                        <canvas id="chart-receber-pagar-balance"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabela Comparativa Consolidada -->
+                <div class="table-container table-consolidated-container">
+                    <h3 class="chart-title" style="padding: 1rem 1rem 0 1rem; margin-bottom: 0;">Balanço Mensal Detalhado (Maio/2026)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fluxo Financeiro</th>
+                                <th>Valor Faturado/Total</th>
+                                <th>Valor Liquidado/Pago</th>
+                                <th>Valor Pendente/A Receber</th>
+                                <th>Eficiência/Pontualidade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-consolidated-body">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Categorias / Clientes -->
+            <div id="categorias" class="tab-content">
+                <div class="filter-bar" id="filter-bar-cat">
+                    <label for="filter-company-cat">Empresa:</label>
+                    <select id="filter-company-cat" class="filter-company-select" onchange="changeCompany(this.value)">
+                        <option value="all">Ambas (Grupo Ceam)</option>
+                        <option value="vale_sapucai">Vale do Sapucaí (Centro Médico)</option>
+                        <option value="ceam_brasil">Ceam Brasil (Convênio)</option>
+                    </select>
+                    <label for="filter-month-cat" style="margin-left: 15px;">Filtrar Mês:</label>
+                    <select id="filter-month-cat" onchange="updateCategoryTab()">
+                        <option value="all">Todos os Meses</option>
+                    </select>
+                </div>
+                <div class="chart-container full-width">
+                    <h3 class="chart-title" id="chart-stacked-title">Detalhamento por Categoria</h3>
+                    <canvas id="chart-categories-stacked"></canvas>
+                </div>
+                <div class="table-container">
+                    <table id="table-categories">
+                        <thead>
+                            <tr id="table-categories-header">
+                                <th id="col-group-label">Categoria</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-categories-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Fornecedores / Clientes Ranking -->
+            <div id="fornecedores" class="tab-content">
+                <div class="filter-bar" id="filter-bar-sup">
+                    <label for="filter-company-sup">Empresa:</label>
+                    <select id="filter-company-sup" class="filter-company-select" onchange="changeCompany(this.value)">
+                        <option value="all">Ambas (Grupo Ceam)</option>
+                        <option value="vale_sapucai">Vale do Sapucaí (Centro Médico)</option>
+                        <option value="ceam_brasil">Ceam Brasil (Convênio)</option>
+                    </select>
+                    <label for="filter-month-sup" style="margin-left: 15px;">Filtrar Mês:</label>
+                    <select id="filter-month-sup" onchange="updateSupplierTab()">
+                        <option value="all">Todos os Meses</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table id="table-suppliers">
+                        <thead>
+                            <tr id="table-suppliers-header"></tr>
+                        </thead>
+                        <tbody id="table-suppliers-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Lançamentos -->
+            <div id="lancamentos" class="tab-content">
+                <div class="advanced-filters">
+                    <div class="filter-box" id="filter-box-company">
+                        <div class="filter-header">
+                            <label>Empresa</label>
+                        </div>
+                        <div class="checkbox-list" id="filter-company-lancamentos" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                            <label class="checkbox-item" style="font-weight: 500; display: flex; align-items: center; gap: 8px; font-size: 0.8rem;">
+                                <input type="radio" name="company-lanc" value="all" checked onchange="changeCompany(this.value)" style="cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary);">
+                                <span>Ambas (Grupo Ceam)</span>
+                            </label>
+                            <label class="checkbox-item" style="font-weight: 500; display: flex; align-items: center; gap: 8px; font-size: 0.8rem;">
+                                <input type="radio" name="company-lanc" value="vale_sapucai" onchange="changeCompany(this.value)" style="cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary);">
+                                <span>Vale do Sapucaí</span>
+                            </label>
+                            <label class="checkbox-item" style="font-weight: 500; display: flex; align-items: center; gap: 8px; font-size: 0.8rem;">
+                                <input type="radio" name="company-lanc" value="ceam_brasil" onchange="changeCompany(this.value)" style="cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary);">
+                                <span>Ceam Brasil</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-box">
+                        <div class="filter-header">
+                            <label>Meses</label>
+                            <div>
+                                <button onclick="toggleAllCheckboxes('filter-months', true)">Todos</button>
+                                <button onclick="toggleAllCheckboxes('filter-months', false)">Nenhum</button>
+                            </div>
+                        </div>
+                        <div class="checkbox-list" id="filter-months"></div>
+                    </div>
+                    <div class="filter-box" id="filter-box-cats">
+                        <div class="filter-header">
+                            <label id="filter-cat-label">Categorias</label>
+                            <div>
+                                <button onclick="toggleAllCheckboxes('filter-categories', true)">Todos</button>
+                                <button onclick="toggleAllCheckboxes('filter-categories', false)">Nenhum</button>
+                            </div>
+                        </div>
+                        <div class="checkbox-list" id="filter-categories"></div>
+                    </div>
+                    <div class="filter-box" id="filter-box-sups">
+                        <div class="filter-header">
+                            <label id="filter-sup-label">Fornecedores</label>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <input type="text" id="search-supplier" placeholder="Buscar..." onkeyup="filterSupplierList()" style="width:100px;padding:4px;font-size:0.7rem;border-radius:4px;border:1px solid #e2e8f0;">
+                                <button onclick="toggleAllCheckboxes('filter-suppliers', true)">Todos</button>
+                                <button onclick="toggleAllCheckboxes('filter-suppliers', false)">Nenhum</button>
+                            </div>
+                        </div>
+                        <div class="checkbox-list" id="filter-suppliers"></div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr id="detail-table-header">
+                                <!-- injected by JS -->
+                            </tr>
+                        </thead>
+                        <tbody id="table-detail-body"></tbody>
+                        <tfoot id="table-detail-foot"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Navigation for Mobile -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-link active" data-tab="visao-geral">
+            <i class="fas fa-chart-line"></i>
+            <span>Visão Geral</span>
+        </a>
+        <a href="#" class="nav-link" data-tab="indicadores">
+            <i class="fas fa-calculator"></i>
+            <span>Indicadores</span>
+        </a>
+        <a href="#" class="nav-link" data-tab="categorias">
+            <i class="fas fa-tags"></i>
+            <span class="cat-label-text">Categorias</span>
+        </a>
+        <a href="#" class="nav-link" data-tab="fornecedores">
+            <i class="fas fa-building"></i>
+            <span class="sup-label-text">Fornecedores</span>
+        </a>
+        <a href="#" class="nav-link" data-tab="lancamentos">
+            <i class="fas fa-list-ul"></i>
+            <span>Lançamentos</span>
+        </a>
+    </div>
+
+    <script src="data_financeiro.js?v=3"></script>
+    <script src="script_financeiro.js?v=3"></script>
+</body>
+</html>

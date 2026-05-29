@@ -1,0 +1,12 @@
+{
+  "name": "contas-a-pagar",
+  "version": "1.0.0",
+  "description": "Dashboard de Contas à Pagar",
+  "main": "script_financeiro.js",
+  "scripts": {
+    "specify:pull": "specify pull"
+  },
+  "devDependencies": {
+    "@specifyapp/cli": "^1.2.0"
+  }
+}

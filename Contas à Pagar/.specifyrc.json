@@ -1,0 +1,21 @@
+{
+  "repository": "@username/repository",
+  "personalAccessToken": "YOUR_PERSONAL_ACCESS_TOKEN",
+  "rules": [
+    {
+      "name": "Design Tokens",
+      "path": "./styles/theme.css",
+      "filter": {
+        "types": ["color", "measurement", "font"]
+      },
+      "parsers": [
+        {
+          "name": "to-css-custom-properties",
+          "options": {
+            "format": "kebab-case"
+          }
+        }
+      ]
+    }
+  ]
+}
